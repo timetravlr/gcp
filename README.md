@@ -1,2 +1,2 @@
 # gcp
-Google Cloud scripts
+Google Cloud scripts and notes
