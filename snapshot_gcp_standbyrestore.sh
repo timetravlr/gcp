@@ -14,7 +14,8 @@
 #8. (Not automated) Enable and start postgresql-11, fix /data/pgdata/recovery.conf, repmgr standby follow
 
 DATA1_SIZE="6000"
-SNAP_RESTOREFROM="gb-almdbro-02-2022-10-03"
+SNAP_RESTOREFROM="gx-dbro-02-2022-10-03"
+KMS_KEY="projects/projname/locations/global/keyRings/encryption/cryptoKey/something/disks"
 
 echo "Enter VM name: "
 read vmname
@@ -88,7 +89,7 @@ function destroy_disk()
   
   if [ "$deletedisk" == "YES" ]; then
     echo "Detaching disk $diskname..."
-    gcloud beta compute instances detach-disk $vmname --zone=$zonename --disk $diskname
+    gcloud compute instances detach-disk $vmname --zone=$zonename --disk $diskname
     
     echo "Deleting disk..."
     gcloud compute disks delete $diskname --zone=$zonename
@@ -100,7 +101,7 @@ function create_new_disk_from_snap()
 {
   list_snapshot
   echo "Creating new disk from snapshot... this will take some time..."
-  gcloud compute disks create $diskname --size $DATA1_SIZE --source-snapshot $snapshotname --zone=$zonename --type pd-ssd
+  gcloud compute disks create $diskname --size $DATA1_SIZE --source-snapshot $snapshotname --zone=$zonename --type pd-ssd --kms-key $KMS_KEY
   
   #Attach the disk created from step as the data1 disk:
   echo "Attaching disk..."
