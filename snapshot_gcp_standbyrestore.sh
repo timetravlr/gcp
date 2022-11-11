@@ -1,5 +1,6 @@
 #!/bin/bash
 # Menu to choose options related to delete data1 volume and recreate from snapshot in GCP
+# Sanitized version for github.
 
 # Requires gcloud auth login first.
 
@@ -72,12 +73,21 @@ function delete_snapshot()
 function detach_disk()
 {
   echo "Stopping postgresql and unmounting /data..."
-  ssh $vmname "sudo systemctl stop postgresql-11 && sudo umount -R /data"
+  if [[ $(ssh $vmname "which postgres" | grep 11) ]]
+  then
+    echo "$vmname pg 11 detected"
+    ssh $vmname "sudo systemctl stop postgresql-11 && sudo umount -R /data"
+   elif [[ $(ssh $vmname "which postgres" | grep 12) ]]
+  then
+    echo "$vmname pg 12 detected"
+    ssh $vmname "sudo systemctl stop postgresql-12 && sudo umount -R /data"
+  fi
   sleep 1
 
   echo "Detaching disk..."
-  gcloud beta compute instances detach-disk $vmname --zone=$zonename --disk $diskname
+  gcloud compute instances detach-disk $vmname --zone=$zonename --disk $diskname
 }
+
 
 function destroy_disk()
 {
